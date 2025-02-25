@@ -50,6 +50,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.fileupload2.core.DiskFileItem;
 import org.apache.commons.fileupload2.core.FileItem;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -84,7 +85,7 @@ public abstract class AbstractAsynchronousUploadHandler implements IAsyncUploadH
     private static final String REGEXP_CONTENT_RANGE_HEADER = "bytes (\\d*)-(\\d*)\\/(\\d*)";
 
     @Override
-    public void process( HttpServletRequest request, HttpServletResponse response, Map<String, Object> map, List<FileItem> listFileItemsToUpload )
+    public void process( HttpServletRequest request, HttpServletResponse response, Map<String, Object> map, List<FileItem<DiskFileItem>> listFileItemsToUpload )
     {
         map.clear( );
         String strFieldName = request.getParameter( PARAMETER_FIELD_NAME );
@@ -120,7 +121,7 @@ public abstract class AbstractAsynchronousUploadHandler implements IAsyncUploadH
                 }
                 else
                 {
-                    for ( FileItem fileItem : listFileItemsToUpload )
+                    for ( FileItem<DiskFileItem> fileItem : listFileItemsToUpload )
                     {
                         addFileItemToUploadedFilesList( fileItem, strFieldName, request );
                     }
@@ -133,11 +134,11 @@ public abstract class AbstractAsynchronousUploadHandler implements IAsyncUploadH
         }
         map.put( KEY_FIELD_NAME, strFieldName );
 
-        List<FileItem> fileItemsSession = getListUploadedFiles( strFieldName, request.getSession( ) );
+        List<FileItem<DiskFileItem>> fileItemsSession = getListUploadedFiles( strFieldName, request.getSession( ) );
         List<Map<String, Object>> listJsonFileMap = new ArrayList<>( );
         map.put( KEY_FILES, listJsonFileMap );
 
-        for ( FileItem fileItem : fileItemsSession )
+        for ( FileItem<DiskFileItem> fileItem : fileItemsSession )
         {
             Map<String, Object> jsonFileMap = new HashMap<>( );
             jsonFileMap.put( KEY_FILE_NAME, fileItem.getName( ) );
@@ -254,9 +255,9 @@ public abstract class AbstractAsynchronousUploadHandler implements IAsyncUploadH
             Arrays.sort( tabFieldIndex );
             ArrayUtils.reverse( tabFieldIndex );
 
-            List<FileItem> fileItemsSession = getListUploadedFiles( strFieldName, request.getSession( ) );
+            List<FileItem<DiskFileItem>> fileItemsSession = getListUploadedFiles( strFieldName, request.getSession( ) );
 
-            List<FileItem> listItemsToRemove = new ArrayList<>( listIndexesFilesToRemove.size( ) );
+            List<FileItem<DiskFileItem>> listItemsToRemove = new ArrayList<>( listIndexesFilesToRemove.size( ) );
 
             for ( int nFieldIndex : tabFieldIndex )
             {
@@ -314,11 +315,11 @@ public abstract class AbstractAsynchronousUploadHandler implements IAsyncUploadH
         if ( request instanceof MultipartHttpServletRequest && hasAddFileFlag( request, strFieldName ) )
         {
             MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
-            List<FileItem> listFileItem = multipartRequest.getFileList( strFieldName );
+            List<FileItem<DiskFileItem>> listFileItem = multipartRequest.getFileList( strFieldName );
 
             if ( CollectionUtils.isNotEmpty( listFileItem ) )
             {
-                for ( FileItem fileItem : listFileItem )
+                for ( FileItem<DiskFileItem> fileItem : listFileItem )
                 {
                     if ( ( fileItem.getSize( ) > 0L ) && StringUtils.isNotEmpty( fileItem.getName( ) ) )
                     {
@@ -365,11 +366,11 @@ public abstract class AbstractAsynchronousUploadHandler implements IAsyncUploadH
         String strFieldName = request.getParameter( PARAMETER_FIELD_NAME );
         String strFieldIndex = request.getParameter( PARAMETER_FIELD_INDEX );
         int intFieldIndex;
-        FileItem itemToDownload = null;
+        FileItem<DiskFileItem> itemToDownload = null;
         if ( StringUtils.isNotEmpty( strFieldIndex ) && StringUtils.isNumeric( strFieldIndex ) )
         {
             intFieldIndex = Integer.parseInt( request.getParameter( PARAMETER_FIELD_INDEX ) );
-            List<FileItem> fileItemsSession = getListUploadedFiles( strFieldName, request.getSession( ) );
+            List<FileItem<DiskFileItem>> fileItemsSession = getListUploadedFiles( strFieldName, request.getSession( ) );
             itemToDownload = fileItemsSession.get( intFieldIndex );
         }
         if ( itemToDownload == null )
@@ -383,7 +384,7 @@ public abstract class AbstractAsynchronousUploadHandler implements IAsyncUploadH
      * {@inheritDoc}
      */
     @Override
-    public List<FileItem> getListPartialUploadedFiles( String strFieldName, HttpSession session )
+    public List<FileItem<DiskFileItem>> getListPartialUploadedFiles( String strFieldName, HttpSession session )
     {
         AppLogService.error( "the Upload Handler do not manage partial content files " );
         return new ArrayList<>( );
@@ -393,7 +394,7 @@ public abstract class AbstractAsynchronousUploadHandler implements IAsyncUploadH
      * {@inheritDoc}
      */
     @Override
-    public void addFileItemToPartialUploadedFilesList( FileItem fileItem, String strFieldName, HttpServletRequest request )
+    public void addFileItemToPartialUploadedFilesList( FileItem<DiskFileItem> fileItem, String strFieldName, HttpServletRequest request )
     {
         AppLogService.error( "the Upload Handler do not manage partial content files " );
     }
@@ -476,12 +477,12 @@ public abstract class AbstractAsynchronousUploadHandler implements IAsyncUploadH
     public void removeFileItem( String strFieldName, HttpSession session, int nIndex )
     {
         // Remove the file (this will also delete the file physically)
-        List<FileItem> uploadedFiles = getListUploadedFiles( strFieldName, session );
+        List<FileItem<DiskFileItem>> uploadedFiles = getListUploadedFiles( strFieldName, session );
 
         if ( ( uploadedFiles != null ) && !uploadedFiles.isEmpty( ) && ( uploadedFiles.size( ) > nIndex ) )
         {
             // Remove the object from the Hashmap
-            FileItem fileItem = uploadedFiles.remove( nIndex );
+            FileItem<DiskFileItem> fileItem = uploadedFiles.remove( nIndex );
             try
             {
             	fileItem.delete( );

@@ -46,6 +46,7 @@ import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
+import org.apache.commons.fileupload2.core.DiskFileItem;
 import org.apache.commons.fileupload2.core.FileItem;
 import org.apache.commons.lang3.StringUtils;
 
@@ -64,7 +65,7 @@ public class AsynchronousUploadHandler extends AbstractAsynchronousUploadHandler
     private static final String ERROR_MESSAGE_UNKNOWN_ERROR = "asynchronousupload.message.unknownError";
 
     /** contains uploaded file items */
-    private static Map<String, Map<String, List<FileItem>>> _mapAsynchronousUpload = new ConcurrentHashMap<>( );
+    private static Map<String, Map<String, List<FileItem<DiskFileItem>>>> _mapAsynchronousUpload = new ConcurrentHashMap<>( );
 
     /**
      * Get the handler
@@ -86,7 +87,7 @@ public class AsynchronousUploadHandler extends AbstractAsynchronousUploadHandler
     }
 
     @Override
-    public String canUploadFiles( HttpServletRequest request, String strFieldName, List<FileItem> listFileItemsToUpload, Locale locale )
+    public String canUploadFiles( HttpServletRequest request, String strFieldName, List<FileItem<DiskFileItem>> listFileItemsToUpload, Locale locale )
     {
         if ( StringUtils.isNotBlank( strFieldName ) )
         {
@@ -99,7 +100,7 @@ public class AsynchronousUploadHandler extends AbstractAsynchronousUploadHandler
     }
 
     @Override
-    public List<FileItem> getListUploadedFiles( String strFieldName, HttpSession session )
+    public List<FileItem<DiskFileItem>> getListUploadedFiles( String strFieldName, HttpSession session )
     {
         if ( StringUtils.isBlank( strFieldName ) )
         {
@@ -111,13 +112,13 @@ public class AsynchronousUploadHandler extends AbstractAsynchronousUploadHandler
         initMap( sessionId, strFieldName );
 
         // find session-related files in the map
-        Map<String, List<FileItem>> mapFileItemsSession = _mapAsynchronousUpload.get( sessionId );
+        Map<String, List<FileItem<DiskFileItem>>> mapFileItemsSession = _mapAsynchronousUpload.get( sessionId );
 
         return mapFileItemsSession.get( strFieldName );
     }
 
     @Override
-    public void addFileItemToUploadedFilesList( FileItem fileItem, String strFieldName, HttpServletRequest request )
+    public void addFileItemToUploadedFilesList( FileItem<DiskFileItem> fileItem, String strFieldName, HttpServletRequest request )
     {
         // This is the name that will be displayed in the form. We keep
         // the original name, but clean it to make it cross-platform.
@@ -127,7 +128,7 @@ public class AsynchronousUploadHandler extends AbstractAsynchronousUploadHandler
         initMap( sessionId, strFieldName );
 
         // Check if this file has not already been uploaded
-        List<FileItem> uploadedFiles = getListUploadedFiles( strFieldName, request.getSession( ) );
+        List<FileItem<DiskFileItem>> uploadedFiles = getListUploadedFiles( strFieldName, request.getSession( ) );
 
         if ( uploadedFiles != null )
         {
@@ -135,11 +136,11 @@ public class AsynchronousUploadHandler extends AbstractAsynchronousUploadHandler
 
             if ( !uploadedFiles.isEmpty( ) )
             {
-                Iterator<FileItem> iterUploadedFiles = uploadedFiles.iterator( );
+                Iterator<FileItem<DiskFileItem>> iterUploadedFiles = uploadedFiles.iterator( );
 
                 while ( bNew && iterUploadedFiles.hasNext( ) )
                 {
-                    FileItem uploadedFile = iterUploadedFiles.next( );
+                    FileItem<DiskFileItem> uploadedFile = iterUploadedFiles.next( );
                     String strUploadedFileName = UploadUtil.cleanFileName( uploadedFile.getName( ).trim( ) );
                     // If we find a file with the same name and the same
                     // length, we consider that the current file has
@@ -164,7 +165,7 @@ public class AsynchronousUploadHandler extends AbstractAsynchronousUploadHandler
     private void initMap( String strSessionId, String strFieldName )
     {
         // find session-related files in the map
-        Map<String, List<FileItem>> mapFileItemsSession = _mapAsynchronousUpload.get( strSessionId );
+        Map<String, List<FileItem<DiskFileItem>>> mapFileItemsSession = _mapAsynchronousUpload.get( strSessionId );
 
         // create map if not exists
         if ( mapFileItemsSession == null )

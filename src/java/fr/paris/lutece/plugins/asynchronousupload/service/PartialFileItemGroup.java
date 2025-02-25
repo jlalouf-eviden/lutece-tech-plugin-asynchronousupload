@@ -46,6 +46,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.fileupload2.core.DiskFileItem;
 import org.apache.commons.fileupload2.core.FileItem;
 import org.apache.commons.fileupload2.core.FileItemHeaders;
 import org.apache.commons.io.FilenameUtils;
@@ -57,10 +58,10 @@ import fr.paris.lutece.util.filesystem.UploadUtil;
 /**
  * File item witch contains a list of partial file item
  */
-public class PartialFileItemGroup implements FileItem
+public class PartialFileItemGroup implements FileItem<DiskFileItem>
 {
     private static final long serialVersionUID = 8696893066570050604L;
-    private List<FileItem> _items;
+    private List<FileItem<DiskFileItem>> _items;
     private SequenceInputStream _sequenceInputStream;
 
     /**
@@ -69,7 +70,7 @@ public class PartialFileItemGroup implements FileItem
      * @param item
      *            the item
      */
-    public PartialFileItemGroup( List<FileItem> items )
+    public PartialFileItemGroup( List<FileItem<DiskFileItem>> items )
     {
         _items = items;
         List<InputStream> vOut = new ArrayList<>( );
@@ -77,7 +78,7 @@ public class PartialFileItemGroup implements FileItem
         try
         {
 
-            for ( FileItem fileItem : items )
+            for ( FileItem<DiskFileItem> fileItem : items )
             {
                 vOut.add( fileItem.getInputStream( ) );
 
@@ -95,9 +96,9 @@ public class PartialFileItemGroup implements FileItem
      * {@inheritDoc}
      */
     @Override
-    public FileItem delete( ) throws IOException
+    public DiskFileItem delete( ) throws IOException
     {
-        for ( FileItem item : _items )
+        for ( FileItem<DiskFileItem> item : _items )
         {
             item.delete( );
         }
@@ -175,7 +176,7 @@ public class PartialFileItemGroup implements FileItem
     @Override
     public long getSize( )
     {
-        return _items.stream( ).collect( Collectors.summingLong( FileItem::getSize ) );
+        return _items.stream( ).collect( Collectors.summingLong( FileItem<DiskFileItem>::getSize ) );
     }
 
     /**
@@ -247,7 +248,7 @@ public class PartialFileItemGroup implements FileItem
      * {@inheritDoc}
      */
     @Override
-    public FileItem setFieldName( String name )
+    public DiskFileItem setFieldName( String name )
     {
         return _items.get( 0 ).setFieldName( name );
     }
@@ -256,7 +257,7 @@ public class PartialFileItemGroup implements FileItem
      * {@inheritDoc}
      */
     @Override
-    public FileItem setFormField( boolean state )
+    public DiskFileItem setFormField( boolean state )
     {
         return _items.get( 0 ).setFormField( state );
     }
@@ -265,7 +266,7 @@ public class PartialFileItemGroup implements FileItem
      * {@inheritDoc}
      */
     @Override
-    public FileItem write( Path file ) throws IOException
+    public DiskFileItem write( Path file ) throws IOException
     {
         return null;
     }
@@ -307,7 +308,7 @@ public class PartialFileItemGroup implements FileItem
      * {@inheritDoc}
      */
     @Override
-    public FileItem setHeaders( FileItemHeaders headers )
+    public DiskFileItem setHeaders( FileItemHeaders headers )
     {
         // No Default Headers
     	return null;
