@@ -39,13 +39,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.SequenceInputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileItemHeaders;
+import org.apache.commons.fileupload2.core.FileItem;
+import org.apache.commons.fileupload2.core.FileItemHeaders;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 
@@ -93,12 +95,13 @@ public class PartialFileItemGroup implements FileItem
      * {@inheritDoc}
      */
     @Override
-    public void delete( )
+    public FileItem delete( ) throws IOException
     {
         for ( FileItem item : _items )
         {
             item.delete( );
         }
+        return null;
     }
 
     /**
@@ -188,11 +191,40 @@ public class PartialFileItemGroup implements FileItem
      * {@inheritDoc}
      */
     @Override
-    public String getString( String encoding ) throws UnsupportedEncodingException
+    public String getString( Charset encoding ) throws IOException
     {
         return _items.get( 0 ).getString( encoding );
     }
 
+    /**
+     * Returns the contents of the file item as a String, using the specified
+     * encoding.  This method uses {@link #get()} to retrieve the
+     * contents of the item.
+     * 
+     * This method is deprecated. Use getString( Charset encoding ) method instead
+     *
+     * @param encoding The character encoding to use.
+     *
+     * @return The contents of the item, as a string.
+     *
+     * @throws UnsupportedEncodingException if the requested character
+     *                                      encoding is not available.
+     */
+    @Deprecated
+    public String getString( String encoding ) throws UnsupportedEncodingException
+    {
+    	String str = null;
+    	try
+    	{
+    		str = getString( Charset.forName( encoding ) );
+    	}
+    	catch( IOException e )
+    	{
+    		throw new UnsupportedEncodingException( e.getMessage( ) );
+    	}
+        return str;
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -215,24 +247,48 @@ public class PartialFileItemGroup implements FileItem
      * {@inheritDoc}
      */
     @Override
-    public void setFieldName( String name )
+    public FileItem setFieldName( String name )
     {
-        _items.get( 0 ).setFieldName( name );
+        return _items.get( 0 ).setFieldName( name );
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void setFormField( boolean state )
+    public FileItem setFormField( boolean state )
     {
-        _items.get( 0 ).setFormField( state );
+        return _items.get( 0 ).setFormField( state );
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
+    public FileItem write( Path file ) throws IOException
+    {
+        return null;
+    }
+    
+    /**
+     * A convenience method to write an uploaded item to disk. The client code
+     * is not concerned with whether or not the item is stored in memory, or on
+     * disk in a temporary location. They just want to write the uploaded item
+     * to a file.
+     * <p>
+     * This method is not guaranteed to succeed if called more than once for
+     * the same item. This allows a particular implementation to use, for
+     * example, file renaming, where possible, rather than copying all of the
+     * underlying data, thus gaining a significant performance benefit.
+     * 
+     * This method is deprecated. Use write( Path file ) method instead
+     *
+     * @param file The <code>File</code> into which the uploaded item should
+     *             be stored.
+     *
+     * @throws Exception if an error occurs.
+     */
+    @Deprecated
     public void write( File file ) throws Exception
     {
         // Nothing
@@ -251,8 +307,9 @@ public class PartialFileItemGroup implements FileItem
      * {@inheritDoc}
      */
     @Override
-    public void setHeaders( FileItemHeaders headers )
+    public FileItem setHeaders( FileItemHeaders headers )
     {
         // No Default Headers
+    	return null;
     }
 }

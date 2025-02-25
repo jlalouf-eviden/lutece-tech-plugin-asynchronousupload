@@ -35,16 +35,16 @@ package fr.paris.lutece.plugins.asynchronousupload.service;
 
 import fr.paris.lutece.portal.web.upload.IAsynchronousUploadHandler2;
 
-import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload2.core.FileItem;
 
 import java.util.List;
 import java.util.Locale;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 /**
- * Interface for asynchronous upload handlers used by entries of type upload. Handler must be declared as Spring beans.
+ * Interface for asynchronous upload handlers used by entries of type upload. Handler must be declared as CDI beans.
  */
 public interface IAsyncUploadHandler extends IAsynchronousUploadHandler2
 {

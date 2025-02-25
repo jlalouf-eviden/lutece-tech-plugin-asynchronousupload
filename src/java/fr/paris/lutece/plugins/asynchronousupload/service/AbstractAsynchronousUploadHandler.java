@@ -33,6 +33,7 @@
  */
 package fr.paris.lutece.plugins.asynchronousupload.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,12 +45,12 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload2.core.FileItem;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -481,7 +482,15 @@ public abstract class AbstractAsynchronousUploadHandler implements IAsyncUploadH
         {
             // Remove the object from the Hashmap
             FileItem fileItem = uploadedFiles.remove( nIndex );
-            fileItem.delete( );
+            try
+            {
+            	fileItem.delete( );
+            }
+            catch( IOException e )
+            {
+            	AppLogService.error( e.getMessage( ), e );
+            }
+            
         }
     }
 }

@@ -35,10 +35,10 @@ package fr.paris.lutece.plugins.asynchronousupload.util;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.xml.bind.DatatypeConverter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.xml.bind.DatatypeConverter;
 
-import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload2.core.FileItem;
 import org.apache.commons.lang3.StringUtils;
 
 import fr.paris.lutece.portal.service.i18n.I18nService;

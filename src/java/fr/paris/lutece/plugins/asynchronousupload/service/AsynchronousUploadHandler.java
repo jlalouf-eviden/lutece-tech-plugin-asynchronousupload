@@ -40,21 +40,24 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.spi.CDI;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
-import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload2.core.FileItem;
 import org.apache.commons.lang3.StringUtils;
 
 import fr.paris.lutece.portal.service.i18n.I18nService;
-import fr.paris.lutece.portal.service.spring.SpringContextService;
 import fr.paris.lutece.portal.service.util.AppException;
 import fr.paris.lutece.util.filesystem.UploadUtil;
 
+@ApplicationScoped
+@Named( "asynchronous-upload.asynchronousUploadHandler" )
 public class AsynchronousUploadHandler extends AbstractAsynchronousUploadHandler
 {
 
-    private static final String BEAN_NAME = "asynchronous-upload.asynchronousUploadHandler";
     private static final String HANDLER_NAME = "asynchronousUploadHandler";
 
     // Error messages
@@ -66,11 +69,20 @@ public class AsynchronousUploadHandler extends AbstractAsynchronousUploadHandler
     /**
      * Get the handler
      * 
+     * <p>This method is deprecated and is provided for backward compatibility only. 
+     * For new code, use dependency injection with {@code @Inject} to obtain the 
+     * {@link AsynchronousUploadHandler} instance instead.</p>
+     * 
+     * 
      * @return the handler
+     * 
+     * @deprecated Use {@code @Inject} to obtain the {@link AsynchronousUploadHandler} 
+     * instance. This method will be removed in future versions.
      */
+    @Deprecated
     public static AsynchronousUploadHandler getHandler( )
     {
-        return SpringContextService.getBean( BEAN_NAME );
+    	return CDI.current( ).select( AsynchronousUploadHandler.class ) .get( );
     }
 
     @Override

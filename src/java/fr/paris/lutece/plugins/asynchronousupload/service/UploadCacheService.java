@@ -34,31 +34,45 @@
 package fr.paris.lutece.plugins.asynchronousupload.service;
 
 import fr.paris.lutece.portal.service.cache.AbstractCacheableService;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.spi.CDI;
 
 /**
  * Cache service for asynchronous upload
  */
-public final class UploadCacheService extends AbstractCacheableService
+@ApplicationScoped
+public class UploadCacheService extends AbstractCacheableService<String,String>
 {
     private static final String CACHE_NAME = "asynchronousupload.asynchronousUploadCacheService";
-    private static UploadCacheService _instance = new UploadCacheService( );
 
-    /**
-     * Private constructor
-     */
-    private UploadCacheService( )
+    UploadCacheService( )
+    {
+    	// Ctor
+    }
+
+    @PostConstruct
+    private void initUploadCacheService( )
     {
         initCache( );
     }
-
+    
     /**
-     * Get the instance of the service
+     * Returns the unique instance of the {@link UploadCacheService} service.
      * 
-     * @return The instance of the service
+     * <p>This method is deprecated and is provided for backward compatibility only. 
+     * For new code, use dependency injection with {@code @Inject} to obtain the 
+     * {@link UploadCacheService} instance instead.</p>
+     * 
+     * @return The unique instance of {@link UploadCacheService}.
+     * 
+     * @deprecated Use {@code @Inject} to obtain the {@link UploadCacheService} 
+     * instance. This method will be removed in future versions.
      */
+    @Deprecated
     public static UploadCacheService getInstance( )
     {
-        return _instance;
+        return CDI.current( ).select( UploadCacheService.class ).get( );
     }
 
     /**
